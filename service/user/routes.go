@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Parz1val02/ecom/config"
 	"github.com/Parz1val02/ecom/service/auth"
 	"github.com/Parz1val02/ecom/types"
 	"github.com/Parz1val02/ecom/utils"
@@ -53,7 +54,14 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = utils.WriteJSON(w, http.StatusCreated, map[string]string{"success": fmt.Sprintf("user with email %s was found", payload.Email)})
+	// Create JWT
+	secret := []byte(config.Envs.JWTSecret)
+	token, err := auth.CreateJWT(secret, u.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+	err = utils.WriteJSON(w, http.StatusCreated, map[string]string{"token": token})
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
