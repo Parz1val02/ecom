@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Parz1val02/ecom/service/auth"
 	"github.com/Parz1val02/ecom/types"
@@ -44,7 +45,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the user exists
 	_, err := h.store.GetUserByEmail(payload.Email)
-	if err != nil {
+	if err == nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", payload.Email))
 		return
 	}
@@ -61,13 +62,14 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		LastName:  payload.LastName,
 		Email:     payload.Email,
 		Password:  hashedPassword,
+		CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
 	})
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	err = utils.WriteJSON(w, http.StatusCreated, nil)
+	err = utils.WriteJSON(w, http.StatusCreated, map[string]string{"success": fmt.Sprintf("user with email %s created successfully", payload.Email)})
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
