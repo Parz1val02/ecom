@@ -39,6 +39,33 @@ type Product struct {
 	CreatedAt   string  `json:"createAt"`
 }
 
+type Order struct {
+	ID        int     `json:"id"`
+	UserID    int     `json:"userID"`
+	Total     float64 `json:"total"`
+	Status    string  `json:"status"`
+	Address   string  `json:"address"`
+	CreatedAt string  `json:"createdAt"`
+}
+
+type OrderItem struct {
+	ID        int     `json:"id"`
+	OrderID   int     `json:"orderID"`
+	ProductID int     `json:"productID"`
+	Quantity  int     `json:"quantity"`
+	Price     float64 `json:"price"`
+	CreatedAt string  `json:"createdAt"`
+}
+
+type CartItem struct {
+	ProductID int `json:"productID" validate:"number"`
+	Quantity  int `json:"quantity"  validate:"number"`
+}
+
+type CartCheckoutPayload struct {
+	Items []CartItem `json:"items" validate:"required"`
+}
+
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
@@ -46,5 +73,11 @@ type UserStore interface {
 }
 type ProductStore interface {
 	GetProducts() ([]Product, error)
+	GetProductsByIDs(ids []int) ([]Product, error)
 	CreateProduct(product Product) error
+	UpdateProduct(product Product) error
+}
+type OrderStore interface {
+	CreateOrder(Order) (int, error)
+	CreateOrderItem(OrderItem) error
 }
