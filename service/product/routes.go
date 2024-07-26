@@ -3,6 +3,7 @@ package product
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Parz1val02/ecom/types"
@@ -21,6 +22,7 @@ func NewHandler(store types.ProductStore) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/products", h.handleGetProducts).Methods(http.MethodGet)
+	router.HandleFunc("/products/{id}", h.handleGetProductByID).Methods(http.MethodGet)
 	router.HandleFunc("/products", h.handleCreateProduct).Methods(http.MethodPost)
 }
 
@@ -31,6 +33,29 @@ func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = utils.WriteJSON(w, http.StatusOK, ps)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (h *Handler) handleGetProductByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idString := vars["id"]
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error when parsing id"))
+		return
+	}
+
+	p, err := h.store.GetProductByID(id)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+
+	}
+
+	err = utils.WriteJSON(w, http.StatusOK, p)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return

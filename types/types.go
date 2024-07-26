@@ -36,7 +36,7 @@ type Product struct {
 	Image       string  `json:"image"`
 	Price       float64 `json:"price"`
 	Quantity    int     `json:"quantity"`
-	CreatedAt   string  `json:"createAt"`
+	CreatedAt   string  `json:"createdAt"`
 }
 
 type Order struct {
@@ -73,6 +73,7 @@ type UserStore interface {
 }
 type ProductStore interface {
 	GetProducts() ([]Product, error)
+	GetProductByID(id int) (*Product, error)
 	GetProductsByIDs(ids []int) ([]Product, error)
 	CreateProduct(product Product) error
 	UpdateProduct(product Product) error

@@ -57,6 +57,24 @@ func (s *Store) CreateProduct(product types.Product) error {
 	return nil
 }
 
+func (s *Store) GetProductByID(ID int) (*types.Product, error) {
+	rows, err := s.db.Query("SELECT * from products WHERE id = ?", ID)
+	if err != nil {
+		return nil, err
+	}
+	p := new(types.Product)
+	for rows.Next() {
+		p, err = scanRowIntoProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if p.ID == 0 {
+		return nil, fmt.Errorf("product not found")
+	}
+	return p, nil
+}
+
 func (s *Store) GetProductsByIDs(productIDs []int) ([]types.Product, error) {
 	placeholders := strings.Repeat(",?", len(productIDs)-1)
 	query := fmt.Sprintf("SELECT * FROM products WHERE id IN (?%s)", placeholders)
